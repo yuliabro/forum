@@ -1,0 +1,113 @@
+<% title "Post" %>
+
+<p>
+  <strong>Content:</strong>
+  <%=h @post.content %>
+</p>
+
+<p>
+  <%= link_to "Edit", edit_post_path(@post) %> |
+  <%= link_to "Destroy", @post, :confirm => 'Are you sure?', :method => :delete %> |
+  <%= link_to "View All", posts_path %>
+</p>
+
+  <p> <b> Comments </b> </p>
+
+  <% @post.comments.each do |comment| %>
+
+      <div style="border:1px solid black;">
+          <p class=<%= comment.id.to_s %> > <%= comment.content %></p>
+      </div>
+
+      <%= link_to "Destroy", comment, :confirm => 'Are you sure?', :method => :delete %> | Edit
+
+      <% form_for comment do |f| %>
+          <%= f.error_messages %>
+          <p>
+            <%= f.hidden_field :post_id %>
+          </p>
+          <p>
+            <%= f.label :content %><br />
+            <%= f.text_area :content %>
+          </p>
+          <p><%= f.submit %></p>
+          <p class=<%= "result_" + comment.id.to_s %> ></p>
+      <% end %>
+
+  <% end %>
+
+  <p><b> Create New comment </b> </p>
+
+  <% form_for @comment do |f| %>
+      <%= f.error_messages %>
+      <p>
+        <%= f.hidden_field :post_id, :value => @post.id %>
+      </p>
+      <p>
+        <%= f.label :content %><br />
+        <%= f.text_area :content %>
+      </p>
+      <p><%= f.submit %></p>
+      <p class="create_success"></p>
+  <% end %>
+
+  <script>
+
+      var parse = function(data, comment_id) {
+          var myData = JSON.parse(data);
+          $.each(myData, function() {
+              $("." + comment_id).empty();
+              $("." + comment_id).append(this.content);
+          });
+      };
+
+      var get_comment = function(comment_url, comment_id) {
+          $.ajax({
+              type: 'GET',
+              url: comment_url, //sumbits it to the given url of the form
+              dataType: "JSON", // you want a difference between normal and ajax-calls, and json is standard
+              success: function(data){
+                  parse(data, comment_id);
+              }
+          });
+      };
+
+      $('.new_comment').submit(function(e) {
+          e.preventDefault();
+          var valuesToSubmit = $(this).serialize();
+          var comment_url = $(this).attr('action');
+          $.ajax({
+              type: 'POST',
+              url: $(this).attr('action'), //sumbits it to the given url of the form
+              data: valuesToSubmit,
+              dataType: "JSON", // you want a difference between normal and ajax-calls, and json is standard
+              success: function(){ 
+                  $(".create_success").append("Successfully created comment");
+                  location.reload();
+              }
+          });
+          return false; // prevents normal behaviour
+      });
+
+      $('.edit_comment').submit(function(e) {
+          e.preventDefault();
+          var valuesToSubmit = $(this).serialize();
+          var url = $(this).attr('action');
+          var reg = /\d+$/ ;
+          var comment_url = $(this).attr('action');
+          var comment_id = url.match(reg);
+
+          $.ajax({
+              type: 'POST',
+              url: $(this).attr('action'), //sumbits it to the given url of the form
+              data: valuesToSubmit,
+              dataType: "JSON", // you want a difference between normal and ajax-calls, and json is standard
+              success: function(){ 
+                  $(".result_" + comment_id).replaceWith("Successfully edited comment");
+                  get_comment(comment_url, comment_id);
+              }
+          });
+          return false; // prevents normal behaviour
+      });
+     
+  </script>

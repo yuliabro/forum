@@ -1,0 +1,7 @@
+one:
+  post_id: 1
+  content: MyText
+
+two:
+  post_id: 1
+  content: MyText
