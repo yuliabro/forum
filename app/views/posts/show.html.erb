@@ -67,7 +67,7 @@
               url: comment_url, //sumbits it to the given url of the form
               dataType: "JSON", // you want a difference between normal and ajax-calls, and json is standard
               success: function(data){
-                  parse(data, comment_id);
+                  parse_and_append(data, comment_id);
               }
           });
       };
